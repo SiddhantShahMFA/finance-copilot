@@ -66,7 +66,11 @@ def _build_response(
 
 def _handle_free_intent(snapshot: FinancialSnapshot, intent_id: str) -> tuple[dict, list[str], list[str]]:
     if intent_id == "overspending_summary":
-        spend_ratio = float(snapshot.expense_total) / max(float(snapshot.income_total), 1)
+        income = float(snapshot.income_total)
+        if income <= 0:
+            spend_ratio = float('inf') if float(snapshot.expense_total) > 0 else 0.0
+        else:
+            spend_ratio = float(snapshot.expense_total) / income
         metrics = {
             "monthly_expense": round(float(snapshot.expense_total), 2),
             "expense_to_income_ratio": round(spend_ratio, 4),

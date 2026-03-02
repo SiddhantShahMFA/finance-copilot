@@ -50,3 +50,11 @@ uv run pytest -q
 - `GET /v1/financial-snapshots/latest`
 - `GET /v1/entitlement/me`
 - `PATCH /v1/admin/subscriptions/{user_id}`
+
+## Stage 2 Endpoints
+
+- `GET /v1/health-score`
+- `GET /v1/debt/insights`
+- `GET /v1/cashflow/insights`
+- `GET /v1/goals/feasibility`
+- `POST /v1/simulations/run`

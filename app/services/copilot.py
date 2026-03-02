@@ -11,6 +11,7 @@ from app.services.entitlements import get_or_create_entitlement
 from app.services.financial_snapshots import latest_snapshot
 from app.services.intent_router import resolve_intent
 from app.services.premium_engines import cashflow_insights, debt_insights, goal_feasibility, health_score, run_simulation
+from app.services.usage_tracking import log_prompt_usage
 
 
 def _extract_first_number(text: str) -> float | None:
@@ -319,21 +320,57 @@ def _handle_premium_intent(snapshot: FinancialSnapshot, intent_id: str, question
 
 
 def run_copilot_query(db: Session, user_id: str, question: str, params: dict[str, float]) -> CopilotQueryResponse:
-    intent = resolve_intent(question)
-    snapshot = latest_snapshot(db, user_id)
+    intent_id: str | None = None
+    tier: str | None = None
+    try:
+        intent = resolve_intent(question)
+        intent_id = intent.intent_id
+        tier = intent.tier
+        snapshot = latest_snapshot(db, user_id)
 
-    if intent.tier == "premium":
-        entitlement = get_or_create_entitlement(db, user_id)
-        if not _has_premium_access(entitlement):
-            raise AppError(
-                ErrorCodes.ENTITLEMENT_REQUIRED,
-                "Premium plan required for this copilot intent",
-                status_code=403,
-            )
+        if intent.tier == "premium":
+            entitlement = get_or_create_entitlement(db, user_id)
+            if not _has_premium_access(entitlement):
+                raise AppError(
+                    ErrorCodes.ENTITLEMENT_REQUIRED,
+                    "Premium plan required for this copilot intent",
+                    status_code=403,
+                )
 
-    if intent.tier == "free":
-        metrics, risks, tradeoffs = _handle_free_intent(snapshot, intent.intent_id)
-    else:
-        metrics, risks, tradeoffs = _handle_premium_intent(snapshot, intent.intent_id, question, params)
+        if intent.tier == "free":
+            metrics, risks, tradeoffs = _handle_free_intent(snapshot, intent.intent_id)
+        else:
+            metrics, risks, tradeoffs = _handle_premium_intent(snapshot, intent.intent_id, question, params)
 
-    return _build_response(intent.intent_id, intent.tier, metrics, risks, tradeoffs)
+        response = _build_response(intent.intent_id, intent.tier, metrics, risks, tradeoffs)
+        log_prompt_usage(
+            db=db,
+            user_id=user_id,
+            question=question,
+            status="success",
+            intent_id=intent_id,
+            tier=tier,
+        )
+        return response
+    except AppError as exc:
+        log_prompt_usage(
+            db=db,
+            user_id=user_id,
+            question=question,
+            status="failed",
+            intent_id=intent_id,
+            tier=tier,
+            error_code=exc.error_code,
+        )
+        raise
+    except Exception:
+        log_prompt_usage(
+            db=db,
+            user_id=user_id,
+            question=question,
+            status="failed",
+            intent_id=intent_id,
+            tier=tier,
+            error_code=ErrorCodes.INTERNAL_ERROR,
+        )
+        raise

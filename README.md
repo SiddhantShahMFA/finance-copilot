@@ -66,3 +66,12 @@ uv run pytest -q
 ## Stage 3 Endpoints
 
 - `POST /v1/copilot/query`
+
+## Stage 4 Endpoints
+
+- `GET /v1/admin/overview`
+- `GET /v1/admin/subscriptions`
+- `GET /v1/admin/ai-usage`
+- `GET /v1/admin/data-health`
+- `POST /v1/admin/users/{user_id}/suspend`
+- `POST /v1/admin/users/{user_id}/reset-password`

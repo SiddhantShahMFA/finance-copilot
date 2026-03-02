@@ -19,6 +19,10 @@ JWKS_URL=https://your-auth-domain/.well-known/jwks.json
 JWT_SECRET_KEY=dev-secret
 JWT_ALGORITHM=HS256
 API_VERSION=v1
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_TIMEOUT_SECONDS=10
 ```
 
 Notes:
@@ -58,3 +62,7 @@ uv run pytest -q
 - `GET /v1/cashflow/insights`
 - `GET /v1/goals/feasibility`
 - `POST /v1/simulations/run`
+
+## Stage 3 Endpoints
+
+- `POST /v1/copilot/query`

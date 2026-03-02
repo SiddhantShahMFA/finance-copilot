@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     jwt_secret_key: str | None = "dev-secret"
     jwt_algorithm: str = "HS256"
 
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4.1-mini"
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_timeout_seconds: float = 10.0
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     openai_base_url: str = "https://api.openai.com/v1"
     openai_timeout_seconds: float = 10.0
 
+    rate_limit_enabled: bool = True
+    rate_limit_requests: int = 30
+    rate_limit_window_seconds: int = 60
+    rate_limit_path_prefixes: str = "/v1/copilot/query,/v1/simulations/run,/v1/family"
+    observability_latency_window: int = 1000
+
 
 @lru_cache
 def get_settings() -> Settings:

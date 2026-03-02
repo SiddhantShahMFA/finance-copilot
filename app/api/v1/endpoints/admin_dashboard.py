@@ -9,9 +9,11 @@ from app.schemas.admin import (
     AdminActionResponse,
     AdminOverviewResponse,
     DataHealthResponse,
+    ObservabilityResponse,
     SubscriptionsResponse,
 )
 from app.services.admin import get_ai_usage, get_data_health, get_overview, list_subscriptions, reset_password, suspend_user
+from app.core.observability import observability_store
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -54,6 +56,14 @@ def admin_data_health(
 ) -> DataHealthResponse:
     _ = admin
     return DataHealthResponse.model_validate(get_data_health(db))
+
+
+@router.get("/observability", response_model=ObservabilityResponse)
+def admin_observability(
+    admin: AuthContext = Depends(require_admin),
+) -> ObservabilityResponse:
+    _ = admin
+    return ObservabilityResponse.model_validate(observability_store.snapshot())
 
 
 @router.post("/users/{user_id}/suspend", response_model=AdminActionResponse)

@@ -11,6 +11,10 @@ os.environ["JWT_ALGORITHM"] = "HS256"
 os.environ["JWT_ISSUER"] = "finance-copilot"
 os.environ["JWT_AUDIENCE"] = "finance-copilot-client"
 os.environ["JWKS_URL"] = ""
+os.environ["RATE_LIMIT_ENABLED"] = "true"
+os.environ["RATE_LIMIT_REQUESTS"] = "5"
+os.environ["RATE_LIMIT_WINDOW_SECONDS"] = "60"
+os.environ["RATE_LIMIT_PATH_PREFIXES"] = "/v1/copilot/query,/v1/simulations/run,/v1/family"
 
 from app.core.config import get_settings
 
@@ -18,13 +22,16 @@ get_settings.cache_clear()
 
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
-from app.main import app
+from app.main import app, rate_limiter
+from app.core.observability import observability_store
 
 
 @pytest.fixture(autouse=True)
 def reset_db():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    rate_limiter.reset()
+    observability_store.reset()
     yield
 
 

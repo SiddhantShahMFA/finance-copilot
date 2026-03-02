@@ -44,6 +44,33 @@ def get_or_create_entitlement(db: Session, user_id: str) -> UserEntitlement:
     return entitlement
 
 
+def has_premium_access(entitlement: UserEntitlement) -> bool:
+    if entitlement.plan != PlanEnum.premium or entitlement.status != EntitlementStatusEnum.active:
+        return False
+
+    if entitlement.expiry_date:
+        expiry = entitlement.expiry_date
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+        else:
+            expiry = expiry.astimezone(timezone.utc)
+        if expiry < datetime.now(timezone.utc):
+            return False
+
+    return True
+
+
+def require_premium_access(db: Session, user_id: str) -> UserEntitlement:
+    entitlement = get_or_create_entitlement(db, user_id)
+    if not has_premium_access(entitlement):
+        raise AppError(
+            ErrorCodes.ENTITLEMENT_REQUIRED,
+            "Premium plan required for this endpoint",
+            status_code=403,
+        )
+    return entitlement
+
+
 def patch_entitlement(
     db: Session,
     actor_user_id: str,

@@ -1,5 +1,12 @@
+from tests.conftest import (
+    TEST_SNAPSHOT_USER_ID_1,
+    TEST_SNAPSHOT_USER_ID_2,
+    TEST_SNAPSHOT_USER_ID_3,
+)
+
+
 def test_snapshot_create_and_latest(client, make_token):
-    token = make_token(user_id="user-100", role="user")
+    token = make_token(user_id=TEST_SNAPSHOT_USER_ID_1, role="user")
     headers = {"Authorization": f"Bearer {token}"}
 
     payload = {
@@ -25,7 +32,7 @@ def test_snapshot_create_and_latest(client, make_token):
 
 
 def test_snapshot_upsert_updates_existing_month(client, make_token):
-    token = make_token(user_id="user-101", role="user")
+    token = make_token(user_id=TEST_SNAPSHOT_USER_ID_2, role="user")
     headers = {"Authorization": f"Bearer {token}"}
 
     payload = {
@@ -50,7 +57,7 @@ def test_snapshot_upsert_updates_existing_month(client, make_token):
 
 
 def test_snapshot_validation_error(client, make_token):
-    token = make_token(user_id="user-102", role="user")
+    token = make_token(user_id=TEST_SNAPSHOT_USER_ID_3, role="user")
     headers = {"Authorization": f"Bearer {token}"}
 
     payload = {

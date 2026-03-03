@@ -3,6 +3,13 @@ from datetime import datetime
 from sqlalchemy import select
 
 from app.db.models import AccountLink, AdminAuditLog, UserEntitlement
+from tests.conftest import (
+    TEST_ADMIN_ID,
+    TEST_ADMIN_ID_2,
+    TEST_USAGE_USER_ID,
+    TEST_USER_ID,
+    TEST_USER_ID_2,
+)
 
 
 def _seed_snapshot(client, token, income=200000, expense=120000, assets=800000):
@@ -25,15 +32,15 @@ def _seed_snapshot(client, token, income=200000, expense=120000, assets=800000):
 
 
 def test_admin_overview_and_subscriptions(client, make_token):
-    admin_token = make_token(user_id="admin", role="admin")
-    user1_token = make_token(user_id="u1", role="user")
-    user2_token = make_token(user_id="u2", role="user")
+    admin_token = make_token(user_id=TEST_ADMIN_ID, role="admin")
+    user1_token = make_token(user_id=TEST_USER_ID, role="user")
+    user2_token = make_token(user_id=TEST_USER_ID_2, role="user")
 
     _seed_snapshot(client, user1_token)
     _seed_snapshot(client, user2_token)
 
     patch_response = client.patch(
-        "/v1/admin/subscriptions/u1",
+        f"/v1/admin/subscriptions/{TEST_USER_ID}",
         headers={"Authorization": f"Bearer {admin_token}"},
         json={"plan": "premium", "status": "active", "expiry_date": None},
     )
@@ -50,34 +57,34 @@ def test_admin_overview_and_subscriptions(client, make_token):
     subscriptions = client.get("/v1/admin/subscriptions", headers={"Authorization": f"Bearer {admin_token}"})
     assert subscriptions.status_code == 200
     items = {item["user_id"]: item for item in subscriptions.json()["items"]}
-    assert items["u1"]["plan"] == "premium"
-    assert items["u2"]["plan"] == "free"
+    assert items[TEST_USER_ID]["plan"] == "premium"
+    assert items[TEST_USER_ID_2]["plan"] == "free"
 
 
 def test_admin_ai_usage_and_data_health(client, make_token, db_session):
-    admin_token = make_token(user_id="admin", role="admin")
-    user_token = make_token(user_id="usage-user", role="user")
+    admin_token = make_token(user_id=TEST_ADMIN_ID_2, role="admin")
+    user_token = make_token(user_id=TEST_USAGE_USER_ID, role="user")
 
     _seed_snapshot(client, user_token, assets=900000)
 
     db_session.add_all(
         [
             AccountLink(
-                user_id="usage-user",
+                user_id=TEST_USAGE_USER_ID,
                 account_type="bank",
                 provider="aa",
                 external_account_id="bank-1",
                 status="linked",
             ),
             AccountLink(
-                user_id="usage-user",
+                user_id=TEST_USAGE_USER_ID,
                 account_type="mf",
                 provider="aa",
                 external_account_id="mf-1",
                 status="linked",
             ),
             AccountLink(
-                user_id="usage-user",
+                user_id=TEST_USAGE_USER_ID,
                 account_type="stock",
                 provider="aa",
                 external_account_id="stock-1",
@@ -119,7 +126,7 @@ def test_admin_ai_usage_and_data_health(client, make_token, db_session):
 
 
 def test_admin_user_controls_and_audit_logs(client, make_token, db_session):
-    admin_token = make_token(user_id="admin", role="admin")
+    admin_token = make_token(user_id=TEST_ADMIN_ID_2, role="admin")
 
     suspend = client.post(
         "/v1/admin/users/target-user/suspend",

@@ -1,7 +1,10 @@
+from tests.conftest import TEST_E2E_ADMIN_ID, TEST_E2E_OWNER_ID, TEST_E2E_PARTNER_ID
+
+
 def test_e2e_regression_family_and_admin_flow(client, make_token):
-    admin_token = make_token(user_id="admin-e2e", role="admin")
-    owner_token = make_token(user_id="owner-e2e", role="user")
-    partner_token = make_token(user_id="partner-e2e", role="user")
+    admin_token = make_token(user_id=TEST_E2E_ADMIN_ID, role="admin")
+    owner_token = make_token(user_id=TEST_E2E_OWNER_ID, role="user")
+    partner_token = make_token(user_id=TEST_E2E_PARTNER_ID, role="user")
 
     owner_headers = {"Authorization": f"Bearer {owner_token}"}
     partner_headers = {"Authorization": f"Bearer {partner_token}"}
@@ -37,7 +40,7 @@ def test_e2e_regression_family_and_admin_flow(client, make_token):
 
     assert (
         client.patch(
-            "/v1/admin/subscriptions/owner-e2e",
+            f"/v1/admin/subscriptions/{TEST_E2E_OWNER_ID}",
             headers=admin_headers,
             json={"plan": "premium", "status": "active", "expiry_date": None},
         ).status_code
@@ -45,7 +48,7 @@ def test_e2e_regression_family_and_admin_flow(client, make_token):
     )
     assert (
         client.patch(
-            "/v1/admin/subscriptions/partner-e2e",
+            f"/v1/admin/subscriptions/{TEST_E2E_PARTNER_ID}",
             headers=admin_headers,
             json={"plan": "premium", "status": "active", "expiry_date": None},
         ).status_code
@@ -62,7 +65,7 @@ def test_e2e_regression_family_and_admin_flow(client, make_token):
         client.post(
             f"/v1/family/households/{household_id}/members",
             headers=owner_headers,
-            json={"user_id": "partner-e2e", "role": "member"},
+            json={"user_id": TEST_E2E_PARTNER_ID, "role": "member"},
         ).status_code
         == 200
     )

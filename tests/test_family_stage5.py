@@ -1,3 +1,11 @@
+from tests.conftest import (
+    TEST_ADMIN_ID,
+    TEST_FAMILY_FREE_USER_ID,
+    TEST_FAMILY_MEMBER_USER_ID,
+    TEST_FAMILY_OWNER_USER_ID,
+)
+
+
 def _seed_snapshot(client, token, income=140000, expense=90000, assets=700000, liabilities=200000):
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
@@ -26,7 +34,7 @@ def _upgrade_to_premium(client, admin_token, user_id):
 
 
 def test_family_endpoints_require_premium(client, make_token):
-    user_token = make_token(user_id="family-free", role="user")
+    user_token = make_token(user_id=TEST_FAMILY_FREE_USER_ID, role="user")
     _seed_snapshot(client, user_token)
 
     response = client.post(
@@ -39,15 +47,15 @@ def test_family_endpoints_require_premium(client, make_token):
 
 
 def test_family_household_flow(client, make_token):
-    admin_token = make_token(user_id="admin-family", role="admin")
-    owner_token = make_token(user_id="family-owner", role="user")
-    member_token = make_token(user_id="family-member", role="user")
+    admin_token = make_token(user_id=TEST_ADMIN_ID, role="admin")
+    owner_token = make_token(user_id=TEST_FAMILY_OWNER_USER_ID, role="user")
+    member_token = make_token(user_id=TEST_FAMILY_MEMBER_USER_ID, role="user")
 
     _seed_snapshot(client, owner_token, income=160000, expense=100000, assets=900000, liabilities=250000)
     _seed_snapshot(client, member_token, income=110000, expense=70000, assets=500000, liabilities=150000)
 
-    _upgrade_to_premium(client, admin_token, "family-owner")
-    _upgrade_to_premium(client, admin_token, "family-member")
+    _upgrade_to_premium(client, admin_token, TEST_FAMILY_OWNER_USER_ID)
+    _upgrade_to_premium(client, admin_token, TEST_FAMILY_MEMBER_USER_ID)
 
     create_household = client.post(
         "/v1/family/households",
@@ -60,7 +68,7 @@ def test_family_household_flow(client, make_token):
     add_member = client.post(
         f"/v1/family/households/{household_id}/members",
         headers={"Authorization": f"Bearer {owner_token}"},
-        json={"user_id": "family-member", "role": "member"},
+        json={"user_id": TEST_FAMILY_MEMBER_USER_ID, "role": "member"},
     )
     assert add_member.status_code == 200
     assert add_member.json()["member_count"] == 2

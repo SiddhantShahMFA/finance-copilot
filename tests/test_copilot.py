@@ -1,3 +1,12 @@
+from tests.conftest import (
+    TEST_ADMIN_ID_2,
+    TEST_COPILOT_USER_ID,
+    TEST_FREE_BLOCKED_USER_ID,
+    TEST_FREE_USER_ID,
+    TEST_PREMIUM_USER_ID,
+)
+
+
 def _seed_snapshot(client, token):
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
@@ -17,7 +26,7 @@ def _seed_snapshot(client, token):
 
 
 def test_copilot_rejects_unsupported_prompt(client, make_token):
-    token = make_token(user_id="copilot-user", role="user")
+    token = make_token(user_id=TEST_COPILOT_USER_ID, role="user")
     _seed_snapshot(client, token)
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -31,7 +40,7 @@ def test_copilot_rejects_unsupported_prompt(client, make_token):
 
 
 def test_copilot_allows_free_intent_for_free_user(client, make_token):
-    token = make_token(user_id="free-user", role="user")
+    token = make_token(user_id=TEST_FREE_USER_ID, role="user")
     _seed_snapshot(client, token)
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -48,7 +57,7 @@ def test_copilot_allows_free_intent_for_free_user(client, make_token):
 
 
 def test_copilot_blocks_premium_intent_for_free_user(client, make_token):
-    token = make_token(user_id="free-blocked", role="user")
+    token = make_token(user_id=TEST_FREE_BLOCKED_USER_ID, role="user")
     _seed_snapshot(client, token)
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -62,13 +71,13 @@ def test_copilot_blocks_premium_intent_for_free_user(client, make_token):
 
 
 def test_copilot_allows_premium_intent_for_premium_user(client, make_token):
-    admin_token = make_token(user_id="admin-2", role="admin")
-    user_token = make_token(user_id="premium-user", role="user")
+    admin_token = make_token(user_id=TEST_ADMIN_ID_2, role="admin")
+    user_token = make_token(user_id=TEST_PREMIUM_USER_ID, role="user")
     _seed_snapshot(client, user_token)
 
     # Upgrade user to premium manually.
     patch_response = client.patch(
-        "/v1/admin/subscriptions/premium-user",
+        f"/v1/admin/subscriptions/{TEST_PREMIUM_USER_ID}",
         headers={"Authorization": f"Bearer {admin_token}"},
         json={"plan": "premium", "status": "active", "expiry_date": None},
     )

@@ -1,3 +1,10 @@
+from tests.conftest import (
+    TEST_PREMIUM_GOAL_USER_ID,
+    TEST_PREMIUM_HEALTH_USER_ID,
+    TEST_PREMIUM_SIM_USER_ID,
+)
+
+
 def _seed_snapshot(client, token, **overrides):
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
@@ -24,7 +31,7 @@ def test_health_score_requires_auth(client):
 
 
 def test_health_score_and_debt_insights(client, make_token):
-    token = make_token(user_id="u-premium", role="user")
+    token = make_token(user_id=TEST_PREMIUM_HEALTH_USER_ID, role="user")
     headers = {"Authorization": f"Bearer {token}"}
     _seed_snapshot(client, token)
 
@@ -42,7 +49,7 @@ def test_health_score_and_debt_insights(client, make_token):
 
 
 def test_cashflow_goal_and_simulation(client, make_token):
-    token = make_token(user_id="u-goal", role="user")
+    token = make_token(user_id=TEST_PREMIUM_GOAL_USER_ID, role="user")
     headers = {"Authorization": f"Bearer {token}"}
     _seed_snapshot(client, token, expense_total=100000)
 
@@ -84,7 +91,7 @@ def test_cashflow_goal_and_simulation(client, make_token):
 
 
 def test_simulation_validation_error(client, make_token):
-    token = make_token(user_id="u-sim", role="user")
+    token = make_token(user_id=TEST_PREMIUM_SIM_USER_ID, role="user")
     headers = {"Authorization": f"Bearer {token}"}
     _seed_snapshot(client, token)
 

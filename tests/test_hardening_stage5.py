@@ -1,3 +1,10 @@
+from tests.conftest import (
+    TEST_OBSERVABILITY_ADMIN_ID,
+    TEST_OBSERVABILITY_USER_ID,
+    TEST_RATELIMIT_USER_ID,
+)
+
+
 def _seed_snapshot(client, token):
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
@@ -17,8 +24,8 @@ def _seed_snapshot(client, token):
 
 
 def test_observability_endpoint_tracks_requests(client, make_token):
-    admin_token = make_token(user_id="admin-obsv", role="admin")
-    user_token = make_token(user_id="obsv-user", role="user")
+    admin_token = make_token(user_id=TEST_OBSERVABILITY_ADMIN_ID, role="admin")
+    user_token = make_token(user_id=TEST_OBSERVABILITY_USER_ID, role="user")
 
     _seed_snapshot(client, user_token)
 
@@ -38,7 +45,7 @@ def test_observability_endpoint_tracks_requests(client, make_token):
 
 
 def test_rate_limit_blocks_excess_copilot_requests(client, make_token):
-    user_token = make_token(user_id="ratelimit-user", role="user")
+    user_token = make_token(user_id=TEST_RATELIMIT_USER_ID, role="user")
     _seed_snapshot(client, user_token)
 
     headers = {"Authorization": f"Bearer {user_token}"}

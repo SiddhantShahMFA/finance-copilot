@@ -23,6 +23,10 @@ OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_TIMEOUT_SECONDS=10
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_REQUESTS=30
+RATE_LIMIT_WINDOW_SECONDS=60
+RATE_LIMIT_PATH_PREFIXES=/v1/copilot/query,/v1/simulations/run,/v1/family
 ```
 
 Notes:
@@ -73,5 +77,13 @@ uv run pytest -q
 - `GET /v1/admin/subscriptions`
 - `GET /v1/admin/ai-usage`
 - `GET /v1/admin/data-health`
+- `GET /v1/admin/observability`
 - `POST /v1/admin/users/{user_id}/suspend`
 - `POST /v1/admin/users/{user_id}/reset-password`
+
+## Stage 5 Endpoints
+
+- `POST /v1/family/households`
+- `POST /v1/family/households/{household_id}/members`
+- `POST /v1/family/households/{household_id}/goals`
+- `GET /v1/family/overview?household_id=<id>`

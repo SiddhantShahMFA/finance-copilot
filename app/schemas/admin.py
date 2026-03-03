@@ -44,3 +44,18 @@ class AdminActionResponse(BaseModel):
     action: str
     user_id: str
     message: str
+
+
+class ObservabilityEndpointMetric(BaseModel):
+    endpoint: str
+    request_count: int
+    error_count: int
+    avg_latency_ms: float
+    p95_latency_ms: float
+
+
+class ObservabilityResponse(BaseModel):
+    uptime_seconds: float
+    total_requests: int
+    total_errors: int
+    endpoints: list[ObservabilityEndpointMetric]

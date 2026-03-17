@@ -7,3 +7,9 @@ __pycache__/
 *.db
 *.egg-info/
 .DS_Store
+.github/
+.cursor/
+.vscode/
+.coderabbit.yaml
+.uv-cache
+.cache

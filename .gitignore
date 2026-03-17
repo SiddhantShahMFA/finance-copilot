@@ -11,3 +11,5 @@ __pycache__/
 .cursor/
 .vscode/
 .coderabbit.yaml
+.uv-cache
+.cache
